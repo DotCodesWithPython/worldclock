@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0d18" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Orbit Clock" />
+  <meta name="description" content="A modern world clock and precise time zone converter with 200+ countries and all US states." />
+  <title>Orbit — World Clock & Time Converter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%2314152c'/%3E%3Ccircle cx='50' cy='50' r='27' fill='none' stroke='%23a99bff' stroke-width='7'/%3E%3Cpath d='M50 29v22l16 10' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<style>
+:root { color-scheme: dark; --bg:#090b15;--surface:#151827;--line:#2d3041;--text:#f8f8fe;--muted:#a4abc3;--accent:#a999ff;--accent2:#75dce1;--shadow:0 22px 60px rgba(0,0,0,.28); }
+* { box-sizing:border-box; }
+html { min-height:100%; scroll-behavior:smooth; }
+body { margin:0; min-height:100vh; min-height:100dvh; color:var(--text); background:radial-gradient(ellipse 85% 38% at 50% -4%,rgba(124,86,235,.24),transparent 75%),radial-gradient(ellipse 48% 33% at 100% 49%,rgba(30,156,180,.09),transparent),var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+button,input { font:inherit; }
+button { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+button:focus-visible,input:focus-visible { outline:3px solid rgba(169,153,255,.65); outline-offset:3px; }
+.container { max-width:900px; margin:0 auto; padding:22px 22px 48px; }
+header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-bottom:43px; }
+.brand { display:flex; align-items:center; gap:12px; font-size:21px; font-weight:800; letter-spacing:-.8px; }
+.brand-mark { display:grid; place-items:center; width:39px; height:39px; border:1px solid #9184dd; border-radius:13px; background:linear-gradient(145deg,#8b79ef,#4c4b83); box-shadow:0 7px 20px #7466de35; }
+.brand-mark svg { width:21px; height:21px; }
+.header-actions { display:flex; gap:9px; align-items:center; }
+.pill { border:1px solid var(--line); border-radius:100px; background:#1d2030; color:#cdd0e1; font-size:12px; font-weight:700; padding:9px 12px; }
+.pill:hover,.pill.active { border-color:#8e80d9; color:#fff; background:#302b51; }
+.status { display:flex; align-items:center; gap:7px; font-size:12px; color:#b6bdd2; }
+.dot { width:7px;height:7px;border-radius:50%; background:#64e0ba;box-shadow:0 0 12px #64e0ba99; }
+.hero { margin-bottom:27px; }
+.eyebrow { display:inline-block; color:#b7a9ff; letter-spacing:2px; text-transform:uppercase; font-size:10px; font-weight:800; margin-bottom:11px; }
+h1 { font-size:clamp(37px,6vw,59px); letter-spacing:-2.8px; line-height:1.08; margin:0 0 15px; max-width:690px; font-weight:820; }
+.gradient { color:transparent; background:linear-gradient(115deg,#d1c3ff,#8da4ff,#8eebed);background-clip:text;-webkit-background-clip:text; }
+.sub { margin:0; color:var(--muted); max-width:540px; font-size:14px; line-height:1.7; }
+.section-head { display:flex; justify-content:space-between;align-items:baseline;gap:8px;margin:32px 0 14px; }
+.section-head h2 {font-size:18px; letter-spacing:-.5px;margin:0;}
+.section-head p { margin:0; color:#929ab5;font-size:12px; }
+.clocks { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+.clock { position:relative; overflow:hidden; min-height:175px; padding:23px; background:linear-gradient(140deg,#20243b,#141828 72%); border:1px solid #333752; border-radius:22px; box-shadow:var(--shadow); }
+.clock:nth-child(2) { background:linear-gradient(140deg,#1b303b,#141a27 74%);border-color:#29434b; }
+.clock::after { content:""; position:absolute;width:160px;height:160px;border-radius:100%;right:-78px;top:-84px;background:#ad91ff18;filter:blur(20px);pointer-events:none; }
+.clock:nth-child(2)::after {background:#83dce120;}
+.clock-label { display:flex; gap:10px;align-items:center; color:#cbd0e7; font-weight:650; font-size:13px; }
+.flag { font-size:22px; line-height:1; }
+.clock-time { margin:25px 0 5px;font-size:clamp(31px,6vw,48px);font-variant-numeric:tabular-nums; letter-spacing:-1.8px;font-weight:760;white-space:nowrap; }
+.clock-date {color:#a7aec5;font-size:12px;}
+.compare { margin-top:13px;display:flex; gap:9px; align-items:center;justify-content:center;font-size:12px;color:#adb3d0; }
+.compare svg {height:14px;width:14px;}
+.converter { border:1px solid #323648;background:linear-gradient(135deg,#171a2a,#131624);border-radius:25px; padding:23px; box-shadow:var(--shadow); }
+.converter-top {display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:21px;}
+.converter-top h2 {margin:0;font-size:20px;letter-spacing:-.6px;}
+.converter-top small {display:block;margin-top:5px;color:var(--muted);font-size:12px;}
+.tag {font-size:11px;font-weight:700;color:#c8bbff;border:1px solid #51486f;border-radius:100px;padding:7px 10px;background:#27233d;white-space:nowrap;}
+.picker-grid {display:grid; grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr); gap:10px;align-items:center;}
+.field-label {display:block; color:#a9adc5; text-transform:uppercase;letter-spacing:1.5px;font-size:10px;font-weight:800; margin:0 0 10px 2px;}
+.place-btn {display:flex; gap:9px;align-items:center;text-align:left;width:100%;background:#1f2335;color:var(--text);border:1px solid #383c51;border-radius:16px;min-height:80px;padding:13px 12px;}
+.place-btn:hover { border-color:#988bdf;background:#262941; }
+.place-details {flex:1;min-width:0;}
+.place-name {display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.place-sub {display:block;font-size:11px;color:var(--muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chevron {color:#9ba2bc;flex:0 0 auto;}
+.swap { width:43px;height:43px;margin-top:24px;border-radius:13px;display:grid;place-items:center;border:1px solid #494267;color:#c1b3ff;background:#2b2742;transition:transform .2s; }
+.swap:active { transform:rotate(180deg); }
+.datetime-grid {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+.input-wrap {min-width:0;}
+.date-input {width:100%;min-width:0;min-height:49px;padding:10px 13px;border-radius:12px;border:1px solid #3a3e54;background:#202438;color:var(--text);color-scheme:dark;font-size:14px;}
+.result {position:relative; overflow:hidden;border:1px solid #464370;background:linear-gradient(115deg,#2f2b52,#252a49 70%,#1d3545);border-radius:18px;margin-top:18px;padding:20px 22px;}
+.result-top {display:flex;justify-content:space-between;gap:8px;align-items:center;color:#c9c2f2;font-size:11px;font-weight:750;letter-spacing:1px;text-transform:uppercase;}
+.result-time {font-size:clamp(36px,7vw,57px);font-weight:780;letter-spacing:-2px;font-variant-numeric:tabular-nums;margin:10px 0 5px;}
+.result-date {font-size:13px;color:#dadcf1;}
+.result-note {font-size:11px;color:#c7bedf;margin-top:11px;line-height:1.6;}
+.copy-btn {border:1px solid #7368a2;background:#ffffff15;color:#e2dcff;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;}
+.bottom {display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:15px;}
+.now-btn {border:none;background:none;color:#b8a8ff;font-weight:750;font-size:13px;padding:8px 0;}
+.info {font-size:11px;color:#8993b1;text-align:right;line-height:1.5;}
+footer {margin-top:34px;text-align:center;color:#6f7793;font-size:11px;}
+.modal {position:fixed;inset:0;z-index:50;background:#050710ce;display:none;align-items:flex-end;justify-content:center;}
+.modal.open {display:flex;}
+.sheet {background:#171a2a;border:1px solid #393a53;border-radius:25px 25px 0 0;width:min(100%,560px);height:min(78dvh,690px);padding:19px 18px max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column;box-shadow:0 -20px 70px #0008;}
+.handle {height:4px;width:37px;background:#555b77;border-radius:5px;margin:-6px auto 17px;}
+.sheet-head {display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;}
+.sheet-head h3 {margin:0;font-size:20px;letter-spacing:-.4px;}
+.close {width:33px;height:33px;border:0;background:#292e42;color:#bbc2da;font-size:23px;border-radius:50%;}
+.search {width:100%;padding:14px 16px;border:1px solid #44465e;border-radius:13px;background:#24283d;color:var(--text);outline:none;}
+.search:focus {border-color:#b3a5ff;}
+.locations {overflow:auto;overflow-x:hidden;flex:1;margin-top:13px;scrollbar-color:#464964 transparent;}
+.group-title {font-size:10px;color:#939bb8;text-transform:uppercase;letter-spacing:1.8px;font-weight:800;padding:16px 7px 8px;}
+.location {width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:none;border:0;border-bottom:1px solid #ffffff0e;color:#f0f0fb;padding:12px 7px;min-height:57px;}
+.location:hover,.location:focus-visible {background:#272a41;border-radius:9px;}
+.location-title {font-size:13px;font-weight:700;display:block;}
+.location-meta {font-size:11px;color:#979eb9;margin-top:4px;display:block;}
+.location-selected {color:#aea0ff;font-size:18px;margin-left:auto;}
+.no-results {color:var(--muted);text-align:center;padding:45px 16px;font-size:13px;}
+@media(max-width:590px) {
+.container {padding:19px 17px 43px;}
+header {padding-bottom:32px;}
+.status {display:none;}
+.hero {margin-bottom:20px;}
+h1 {font-size:42px;letter-spacing:-2px;}
+.clock {padding:17px;min-height:146px;border-radius:17px;}
+.clock-time {font-size:clamp(25px,7vw,39px);margin:21px 0 7px;letter-spacing:-1.2px;}
+.clock-label {font-size:12px;}
+.clock-date {font-size:11px;}
+.converter {padding:18px;border-radius:20px;}
+.picker-grid {grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:6px;}
+.place-btn {padding:11px 8px;min-height:76px;border-radius:13px;gap:6px;}
+.place-btn .flag {font-size:20px;}
+.place-name {font-size:12px;}
+.place-sub {font-size:10px;}
+.chevron {display:none;}
+.swap {width:34px;height:38px;padding:8px;border-radius:10px;}
+.result {padding:17px;}
+}
+@media(max-width:365px) {.clock-time {font-size:24px;}.place-btn .flag{display:none;}h1{font-size:37px;}.container{padding-left:13px;padding-right:13px;}}
+@media(min-width:650px) { .sheet {border-radius:25px;align-self:center;height:min(75vh,690px);} }
+@media(prefers-reduced-motion:reduce) { *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></div>orbit<span style="color:#aca0ff">.</span></div>
+    <div class="header-actions"><span class="status"><span class="dot"></span> Clocks are live</span><button id="formatBtn" class="pill" type="button" aria-label="Toggle 12 or 24 hour time">12h</button></div>
+  </header>
+  <section class="hero">
+    <span class="eyebrow">Your world, in sync</span>
+    <h1>Every moment.<br><span class="gradient">Everywhere.</span></h1>
+    <p class="sub">Two places. One moment. Know the time anywhere, and convert across time zones without guessing.</p>
+  </section>
+  <div class="section-head"><h2>World clocks</h2><p>Updated every second</p></div>
+  <section class="clocks">
+    <article class="clock"><div class="clock-label"><span class="flag">🇺🇸</span> Georgia, USA</div><div id="georgiaClock" class="clock-time">--:--</div><div id="georgiaDate" class="clock-date">Loading…</div></article>
+    <article class="clock"><div class="clock-label"><span class="flag">🇧🇬</span> Bulgaria</div><div id="bulgariaClock" class="clock-time">--:--</div><div id="bulgariaDate" class="clock-date">Loading…</div></article>
+  </section>
+  <div class="compare"><svg viewBox="0 0 24 24" fill="none" stroke="#ada3e3" stroke-width="2" stroke-linecap="round"><path d="M4 8h16m-5-5 5 5-5 5M20 16H4m5-5-5 5 5 5"/></svg><span id="difference">Calculating time difference…</span></div>
+  <div class="section-head"><h2>Time converter</h2><p>Plan across time zones</p></div>
+  <section class="converter">
+    <div class="converter-top"><div><h2>Convert any time</h2><small>Choose countries, US states, or cities</small></div><span class="tag">Global coverage</span></div>
+    <div class="picker-grid">
+      <div><label class="field-label">From</label><button id="fromBtn" class="place-btn" type="button"><span class="flag" id="fromFlag">🇺🇸</span><span class="place-details"><span class="place-name" id="fromName">Georgia</span><span class="place-sub" id="fromSub">United States</span></span><span class="chevron">⌄</span></button></div>
+      <button id="swapBtn" class="swap" type="button" title="Swap locations" aria-label="Swap locations"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16m-5-4 5 4-5 4M20 17H4m5-4-5 4 5 4"/></svg></button>
+      <div><label class="field-label">To</label><button id="toBtn" class="place-btn" type="button"><span class="flag" id="toFlag">🇧🇬</span><span class="place-details"><span class="place-name" id="toName">Bulgaria</span><span class="place-sub" id="toSub">Europe / Sofia</span></span><span class="chevron">⌄</span></button></div>
+    </div>
+    <div class="datetime-grid"><div class="input-wrap"><label class="field-label" for="dateInput">Date in source</label><input class="date-input" id="dateInput" type="date" /></div><div class="input-wrap"><label class="field-label" for="timeInput">Time in source</label><input class="date-input" id="timeInput" type="time" step="60" /></div></div>
+    <div class="result" aria-live="polite"><div class="result-top"><span>Converted time</span><button class="copy-btn" type="button" id="copyBtn">Copy</button></div><div id="resultTime" class="result-time">--:--</div><div id="resultDate" class="result-date">Select date and time</div><div id="resultNote" class="result-note">Automatically adjusts for daylight saving time.</div></div>
+    <div class="bottom"><button id="nowBtn" type="button" class="now-btn">↻ Use current time</button><span class="info">Accurate time zones · No account needed</span></div>
+  </section>
+  <footer>Made for every time zone · Powered by your device's time zone data</footer>
+</div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet"><div class="handle"></div><div class="sheet-head"><h3 id="modalTitle">Choose a location</h3><button class="close" id="closeBtn" type="button" aria-label="Close">×</button></div><input id="searchInput" class="search" type="search" placeholder="Search a country, state, or city…" autocomplete="off" aria-label="Search locations"/><div id="locationList" class="locations"></div></div>
+</div>
+<script id="countryData" type="text/plain">
+Andorra|AD|Europe/Andorra
+United Arab Emirates|AE|Asia/Dubai
+Afghanistan|AF|Asia/Kabul
+Antigua and Barbuda|AG|America/Antigua
+Anguilla|AI|America/Anguilla
+Albania|AL|Europe/Tirane
+Armenia|AM|Asia/Yerevan
+Angola|AO|Africa/Luanda
+Antarctica|AQ|Antarctica/McMurdo
+Argentina|AR|America/Argentina/Buenos_Aires
+American Samoa|AS|Pacific/Pago_Pago
+Austria|AT|Europe/Vienna
+Australia|AU|Australia/Sydney
+Aruba|AW|America/Aruba
+Åland Islands|AX|Europe/Mariehamn
+Azerbaijan|AZ|Asia/Baku
+Bosnia and Herzegovina|BA|Europe/Sarajevo
+Barbados|BB|America/Barbados
+Bangladesh|BD|Asia/Dhaka
+Belgium|BE|Europe/Brussels
+Burkina Faso|BF|Africa/Ouagadougou
+Bulgaria|BG|Europe/Sofia
+Bahrain|BH|Asia/Bahrain
+Burundi|BI|Africa/Bujumbura
+Benin|BJ|Africa/Porto-Novo
+Saint Barthélemy|BL|America/St_Barthelemy
+Bermuda|BM|Atlantic/Bermuda
+Brunei|BN|Asia/Brunei
+Bolivia|BO|America/La_Paz
+Brazil|BR|America/Sao_Paulo
+Bahamas|BS|America/Nassau
+Bhutan|BT|Asia/Thimphu
+Botswana|BW|Africa/Gaborone
+Belarus|BY|Europe/Minsk
+Belize|BZ|America/Belize
+Canada|CA|America/Toronto
+Congo (DRC)|CD|Africa/Kinshasa
+Central African Republic|CF|Africa/Bangui
+Congo|CG|Africa/Brazzaville
+Switzerland|CH|Europe/Zurich
+Côte d'Ivoire|CI|Africa/Abidjan
+Cook Islands|CK|Pacific/Rarotonga
+Chile|CL|America/Santiago
+Cameroon|CM|Africa/Douala
+China|CN|Asia/Shanghai
+Colombia|CO|America/Bogota
+Costa Rica|CR|America/Costa_Rica
+Cuba|CU|America/Havana
+Cabo Verde|CV|Atlantic/Cape_Verde
+Curaçao|CW|America/Curacao
+Cyprus|CY|Asia/Nicosia
+Czech Republic|CZ|Europe/Prague
+Germany|DE|Europe/Berlin
+Djibouti|DJ|Africa/Djibouti
+Denmark|DK|Europe/Copenhagen
+Dominica|DM|America/Dominica
+Dominican Republic|DO|America/Santo_Domingo
+Algeria|DZ|Africa/Algiers
+Ecuador|EC|America/Guayaquil
+Estonia|EE|Europe/Tallinn
+Egypt|EG|Africa/Cairo
+Eritrea|ER|Africa/Asmara
+Spain|ES|Europe/Madrid
+Ethiopia|ET|Africa/Addis_Ababa
+Finland|FI|Europe/Helsinki
+Fiji|FJ|Pacific/Fiji
+Faroe Islands|FO|Atlantic/Faroe
+France|FR|Europe/Paris
+Gabon|GA|Africa/Libreville
+United Kingdom|GB|Europe/London
+Grenada|GD|America/Grenada
+Georgia|GE|Asia/Tbilisi
+Ghana|GH|Africa/Accra
+Gibraltar|GI|Europe/Gibraltar
+Greenland|GL|America/Nuuk
+Gambia|GM|Africa/Banjul
+Guinea|GN|Africa/Conakry
+Greece|GR|Europe/Athens
+Guatemala|GT|America/Guatemala
+Guam|GU|Pacific/Guam
+Guinea-Bissau|GW|Africa/Bissau
+Guyana|GY|America/Guyana
+Hong Kong|HK|Asia/Hong_Kong
+Honduras|HN|America/Tegucigalpa
+Croatia|HR|Europe/Zagreb
+Haiti|HT|America/Port-au-Prince
+Hungary|HU|Europe/Budapest
+Indonesia|ID|Asia/Jakarta
+Ireland|IE|Europe/Dublin
+Israel|IL|Asia/Jerusalem
+India|IN|Asia/Kolkata
+Iraq|IQ|Asia/Baghdad
+Iran|IR|Asia/Tehran
+Iceland|IS|Atlantic/Reykjavik
+Italy|IT|Europe/Rome
+Jamaica|JM|America/Jamaica
+Jordan|JO|Asia/Amman
+Japan|JP|Asia/Tokyo
+Kenya|KE|Africa/Nairobi
+Kyrgyzstan|KG|Asia/Bishkek
+Cambodia|KH|Asia/Phnom_Penh
+Kiribati|KI|Pacific/Tarawa
+Comoros|KM|Indian/Comoro
+North Korea|KP|Asia/Pyongyang
+South Korea|KR|Asia/Seoul
+Kuwait|KW|Asia/Kuwait
+Kazakhstan|KZ|Asia/Almaty
+Laos|LA|Asia/Vientiane
+Lebanon|LB|Asia/Beirut
+Sri Lanka|LK|Asia/Colombo
+Liberia|LR|Africa/Monrovia
+Lesotho|LS|Africa/Maseru
+Lithuania|LT|Europe/Vilnius
+Luxembourg|LU|Europe/Luxembourg
+Latvia|LV|Europe/Riga
+Libya|LY|Africa/Tripoli
+Morocco|MA|Africa/Casablanca
+Monaco|MC|Europe/Monaco
+Moldova|MD|Europe/Chisinau
+Montenegro|ME|Europe/Podgorica
+Madagascar|MG|Indian/Antananarivo
+Marshall Islands|MH|Pacific/Majuro
+North Macedonia|MK|Europe/Skopje
+Mali|ML|Africa/Bamako
+Myanmar|MM|Asia/Yangon
+Mongolia|MN|Asia/Ulaanbaatar
+Macao|MO|Asia/Macau
+Mauritania|MR|Africa/Nouakchott
+Malta|MT|Europe/Malta
+Mauritius|MU|Indian/Mauritius
+Maldives|MV|Indian/Maldives
+Malawi|MW|Africa/Blantyre
+Mexico|MX|America/Mexico_City
+Malaysia|MY|Asia/Kuala_Lumpur
+Mozambique|MZ|Africa/Maputo
+Namibia|NA|Africa/Windhoek
+New Caledonia|NC|Pacific/Noumea
+Niger|NE|Africa/Niamey
+Nigeria|NG|Africa/Lagos
+Nicaragua|NI|America/Managua
+Netherlands|NL|Europe/Amsterdam
+Norway|NO|Europe/Oslo
+Nepal|NP|Asia/Kathmandu
+Nauru|NR|Pacific/Nauru
+New Zealand|NZ|Pacific/Auckland
+Oman|OM|Asia/Muscat
+Panama|PA|America/Panama
+Peru|PE|America/Lima
+French Polynesia|PF|Pacific/Tahiti
+Papua New Guinea|PG|Pacific/Port_Moresby
+Philippines|PH|Asia/Manila
+Pakistan|PK|Asia/Karachi
+Poland|PL|Europe/Warsaw
+Puerto Rico|PR|America/Puerto_Rico
+Palestine|PS|Asia/Gaza
+Portugal|PT|Europe/Lisbon
+Palau|PW|Pacific/Palau
+Paraguay|PY|America/Asuncion
+Qatar|QA|Asia/Qatar
+Réunion|RE|Indian/Reunion
+Romania|RO|Europe/Bucharest
+Serbia|RS|Europe/Belgrade
+Russia|RU|Europe/Moscow
+Rwanda|RW|Africa/Kigali
+Saudi Arabia|SA|Asia/Riyadh
+Solomon Islands|SB|Pacific/Guadalcanal
+Seychelles|SC|Indian/Mahe
+Sudan|SD|Africa/Khartoum
+Sweden|SE|Europe/Stockholm
+Singapore|SG|Asia/Singapore
+Slovenia|SI|Europe/Ljubljana
+Slovakia|SK|Europe/Bratislava
+Sierra Leone|SL|Africa/Freetown
+San Marino|SM|Europe/San_Marino
+Senegal|SN|Africa/Dakar
+Somalia|SO|Africa/Mogadishu
+Suriname|SR|America/Paramaribo
+South Sudan|SS|Africa/Juba
+El Salvador|SV|America/El_Salvador
+Syria|SY|Asia/Damascus
+Eswatini|SZ|Africa/Mbabane
+Chad|TD|Africa/Ndjamena
+Togo|TG|Africa/Lome
+Thailand|TH|Asia/Bangkok
+Tajikistan|TJ|Asia/Dushanbe
+Timor-Leste|TL|Asia/Dili
+Turkmenistan|TM|Asia/Ashgabat
+Tunisia|TN|Africa/Tunis
+Tonga|TO|Pacific/Tongatapu
+Turkey|TR|Europe/Istanbul
+Trinidad and Tobago|TT|America/Port_of_Spain
+Tuvalu|TV|Pacific/Funafuti
+Taiwan|TW|Asia/Taipei
+Tanzania|TZ|Africa/Dar_es_Salaam
+Ukraine|UA|Europe/Kyiv
+Uganda|UG|Africa/Kampala
+United States|US|America/New_York
+Uruguay|UY|America/Montevideo
+Uzbekistan|UZ|Asia/Samarkand
+Venezuela|VE|America/Caracas
+Vietnam|VN|Asia/Ho_Chi_Minh
+Vanuatu|VU|Pacific/Efate
+Samoa|WS|Pacific/Apia
+Yemen|YE|Asia/Aden
+South Africa|ZA|Africa/Johannesburg
+Zambia|ZM|Africa/Lusaka
+Zimbabwe|ZW|Africa/Harare
+</script>
+<script id="stateData" type="text/plain">
+Alabama|Montgomery|America/Chicago
+Alaska|Anchorage|America/Anchorage
+Arizona|Phoenix|America/Phoenix
+Arkansas|Little Rock|America/Chicago
+California|Los Angeles|America/Los_Angeles
+Colorado|Denver|America/Denver
+Connecticut|Hartford|America/New_York
+Delaware|Dover|America/New_York
+Florida|Miami|America/New_York
+Georgia|Athens|America/New_York
+Hawaii|Honolulu|Pacific/Honolulu
+Idaho|Boise|America/Boise
+Illinois|Chicago|America/Chicago
+Indiana|Indianapolis|America/Indiana/Indianapolis
+Iowa|Des Moines|America/Chicago
+Kansas|Wichita|America/Chicago
+Kentucky|Louisville|America/Kentucky/Louisville
+Louisiana|New Orleans|America/Chicago
+Maine|Portland|America/New_York
+Maryland|Baltimore|America/New_York
+Massachusetts|Boston|America/New_York
+Michigan|Detroit|America/Detroit
+Minnesota|Minneapolis|America/Chicago
+Mississippi|Jackson|America/Chicago
+Missouri|St. Louis|America/Chicago
+Montana|Helena|America/Denver
+Nebraska|Omaha|America/Chicago
+Nevada|Las Vegas|America/Los_Angeles
+New Hampshire|Concord|America/New_York
+New Jersey|Trenton|America/New_York
+New Mexico|Albuquerque|America/Denver
+New York|New York City|America/New_York
+North Carolina|Raleigh|America/New_York
+North Dakota|Fargo|America/Chicago
+Ohio|Columbus|America/New_York
+Oklahoma|Oklahoma City|America/Chicago
+Oregon|Portland|America/Los_Angeles
+Pennsylvania|Philadelphia|America/New_York
+Rhode Island|Providence|America/New_York
+South Carolina|Columbia|America/New_York
+South Dakota|Sioux Falls|America/Chicago
+Tennessee|Nashville|America/Chicago
+Texas|Dallas|America/Chicago
+Utah|Salt Lake City|America/Denver
+Vermont|Montpelier|America/New_York
+Virginia|Richmond|America/New_York
+Washington|Seattle|America/Los_Angeles
+West Virginia|Charleston|America/New_York
+Wisconsin|Madison|America/Chicago
+Wyoming|Cheyenne|America/Denver
+Washington, D.C.|Washington|America/New_York
+</script>
+<script id="cityData" type="text/plain">
+London|United Kingdom|Europe/London|GB
+New York City|United States|America/New_York|US
+Los Angeles|United States|America/Los_Angeles|US
+Chicago|United States|America/Chicago|US
+Denver|United States|America/Denver|US
+Phoenix|United States|America/Phoenix|US
+Athens, Georgia|United States|America/New_York|US
+Sofia|Bulgaria|Europe/Sofia|BG
+Plovdiv|Bulgaria|Europe/Sofia|BG
+Vancouver|Canada|America/Vancouver|CA
+Toronto|Canada|America/Toronto|CA
+Calgary|Canada|America/Edmonton|CA
+Halifax|Canada|America/Halifax|CA
+St. John's|Canada|America/St_Johns|CA
+Mexico City|Mexico|America/Mexico_City|MX
+Cancún|Mexico|America/Cancun|MX
+Tijuana|Mexico|America/Tijuana|MX
+São Paulo|Brazil|America/Sao_Paulo|BR
+Manaus|Brazil|America/Manaus|BR
+Madrid|Spain|Europe/Madrid|ES
+Canary Islands|Spain|Atlantic/Canary|ES
+Lisbon|Portugal|Europe/Lisbon|PT
+Azores|Portugal|Atlantic/Azores|PT
+Paris|France|Europe/Paris|FR
+Tokyo|Japan|Asia/Tokyo|JP
+Beijing|China|Asia/Shanghai|CN
+Mumbai|India|Asia/Kolkata|IN
+Dubai|United Arab Emirates|Asia/Dubai|AE
+Istanbul|Turkey|Europe/Istanbul|TR
+Moscow|Russia|Europe/Moscow|RU
+Novosibirsk|Russia|Asia/Novosibirsk|RU
+Vladivostok|Russia|Asia/Vladivostok|RU
+Sydney|Australia|Australia/Sydney|AU
+Melbourne|Australia|Australia/Melbourne|AU
+Brisbane|Australia|Australia/Brisbane|AU
+Adelaide|Australia|Australia/Adelaide|AU
+Perth|Australia|Australia/Perth|AU
+Auckland|New Zealand|Pacific/Auckland|NZ
+Wellington|New Zealand|Pacific/Auckland|NZ
+Johannesburg|South Africa|Africa/Johannesburg|ZA
+Seoul|South Korea|Asia/Seoul|KR
+Singapore|Singapore|Asia/Singapore|SG
+Jakarta|Indonesia|Asia/Jakarta|ID
+Bali|Indonesia|Asia/Makassar|ID
+Manila|Philippines|Asia/Manila|PH
+Cairo|Egypt|Africa/Cairo|EG
+Buenos Aires|Argentina|America/Argentina/Buenos_Aires|AR
+</script>
+<script>
+(function () {
+"use strict";
+const $ = id => document.getElementById(id);
+const parseRows = id => $(id).textContent.trim().split(/\r?\n/).map(line => line.split("|"));
+const flag = code => /^[A-Z]{2}$/.test(code) ? [...code].map(c => String.fromCodePoint(127397 + c.charCodeAt(0))).join("") : "🌐";
+const locations = [
+ ...parseRows("stateData").map(([name,city,tz]) => ({id:"state:"+name,name,sub:"US state · "+city,code:"US",tz,group:"US states"})),
+ ...parseRows("countryData").map(([name,code,tz]) => ({id:"country:"+code,name,sub:"Country · "+tz.replaceAll("_"," ").split("/").slice(-1)[0],code,tz,group:"Countries"})),
+ ...parseRows("cityData").map(([name,country,tz,code]) => ({id:"city:"+name,name,sub:country+" · City",code,tz,group:"Cities & regions"}))
+].filter(loc => { try {new Intl.DateTimeFormat("en-US",{timeZone:loc.tz});return true;}catch(e){return false;}});
+locations.sort((a,b)=>a.name.localeCompare(b.name));
+const byId = id => locations.find(l=>l.id===id);
+const defaults = {from:"state:Georgia",to:"country:BG",hours:"12"};
+let pref = {};
+try { pref = JSON.parse(localStorage.getItem("orbit-preferences") || "{}"); } catch(e) {}
+let from = byId(pref.from) || byId(defaults.from);
+let to = byId(pref.to) || byId(defaults.to);
+let hours = pref.hours === "24" ? "24" : "12";
+let editing = "from";
+let lastCopy = "";
+let lastModalFocus = null;
+const save = () => {try {localStorage.setItem("orbit-preferences",JSON.stringify({from:from.id,to:to.id,hours}));}catch(e){}};
+function parts(date,tz) {
+ const p = new Intl.DateTimeFormat("en-US",{timeZone:tz,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(date);
+ const obj = Object.fromEntries(p.map(x=>[x.type,x.value]));
+ return {y:+obj.year,m:+obj.month,d:+obj.day,h:+obj.hour,min:+obj.minute,s:+obj.second};
+}
+function offsetAt(instant,tz) {
+ const a=parts(new Date(instant),tz);
+ return Date.UTC(a.y,a.m-1,a.d,a.h,a.min,a.s)-Math.floor(instant/1000)*1000;
+}
+function fromLocal(dateValue,timeValue,tz) {
+ const d=dateValue.split("-").map(Number),t=timeValue.split(":").map(Number);
+ if(d.length!==3 || t.length<2 || d.some(x=>!Number.isFinite(x)) || t.some(x=>!Number.isFinite(x)))return {error:"Enter a valid date and time."};
+ const wanted=Date.UTC(d[0],d[1]-1,d[2],t[0],t[1]);
+ const offsets = new Set([-48,-24,-12,0,12,24,48].map(h=>offsetAt(wanted+h*3600000,tz)));
+ const matches = [];
+ for(const off of offsets) {
+  const instant=wanted-off; const p=parts(new Date(instant),tz);
+  if(p.y===d[0]&&p.m===d[1]&&p.d===d[2]&&p.h===t[0]&&p.min===t[1])matches.push(instant);
+ }
+ if(!matches.length)return {error:"This time does not exist in the selected location due to a clock change. Choose another time."};
+ matches.sort((a,b)=>a-b);
+ return {date:new Date(matches[0]),ambiguous:matches.length>1};
+}
+function clock(date,tz,seconds=false) {
+ return new Intl.DateTimeFormat("en-US",{timeZone:tz,hour:"numeric",minute:"2-digit",...(seconds?{second:"2-digit"}:{}),hour12:hours==="12"}).format(date);
+}
+function fullDate(date,tz) {
+ return new Intl.DateTimeFormat("en-US",{timeZone:tz,weekday:"long",month:"long",day:"numeric",year:"numeric"}).format(date);
+}
+function tzLabel(date,tz) {
+ return new Intl.DateTimeFormat("en-US",{timeZone:tz,timeZoneName:"short"}).formatToParts(date).find(p=>p.type==="timeZoneName")?.value || tz;
+}
+function duration(mins) {
+ const absolute=Math.abs(mins),h=Math.floor(absolute/60),m=absolute%60;
+ return (h?h+"h":"")+(h&&m?" ":"")+(m?m+"m":!h?"0m":"");
+}
+function renderClocks() {
+ const date=new Date();
+ $("georgiaClock").textContent=clock(date,"America/New_York",true);
+ $("georgiaDate").textContent=fullDate(date,"America/New_York");
+ $("bulgariaClock").textContent=clock(date,"Europe/Sofia",true);
+ $("bulgariaDate").textContent=fullDate(date,"Europe/Sofia");
+ const min=Math.round((offsetAt(date.getTime(),"Europe/Sofia")-offsetAt(date.getTime(),"America/New_York"))/60000);
+ $("difference").textContent="Bulgaria is "+duration(min)+" "+(min>=0?"ahead of":"behind")+" Georgia right now";
+}
+function refreshPicker() {
+ [["from",from],["to",to]].forEach(([prefix,loc])=>{
+  $(prefix+"Flag").textContent=flag(loc.code);
+  $(prefix+"Name").textContent=loc.name;
+  $(prefix+"Sub").textContent=loc.sub;
+ });
+ $("formatBtn").textContent=hours+"h";
+ $("formatBtn").classList.toggle("active",hours==="24");
+ renderClocks();
+}
+function setNow() {
+ const p=parts(new Date(),from.tz);
+ $("dateInput").value=[p.y,String(p.m).padStart(2,"0"),String(p.d).padStart(2,"0")].join("-");
+ $("timeInput").value=String(p.h).padStart(2,"0")+":"+String(p.min).padStart(2,"0");
+ convert();
+}
+function convert() {
+ if(!$("dateInput").value || !$("timeInput").value)return;
+ let result;
+ try{result=fromLocal($("dateInput").value,$("timeInput").value,from.tz);}catch(e){result={error:"Could not convert this date in the selected time zone."};}
+ if(result.error){$("resultTime").textContent="—";$("resultDate").textContent=result.error;$("resultNote").textContent="Try a different date or time.";lastCopy="";return;}
+ $("resultTime").textContent=clock(result.date,to.tz);
+ $("resultDate").textContent=fullDate(result.date,to.tz)+" · "+tzLabel(result.date,to.tz);
+ const src=parts(result.date,from.tz),dst=parts(result.date,to.tz);
+ const offset=Math.round((offsetAt(result.date.getTime(),to.tz)-offsetAt(result.date.getTime(),from.tz))/60000);
+ const sourceDay=Date.UTC(src.y,src.m-1,src.d),targetDay=Date.UTC(dst.y,dst.m-1,dst.d);
+ const days=Math.round((targetDay-sourceDay)/86400000);
+ let note="Time difference: "+duration(offset)+" "+(offset>=0?"ahead":"behind")+".";
+ if(days===1)note+=" Next calendar day.";
+ if(days===-1)note+=" Previous calendar day.";
+ if(days>1 || days< -1)note+=" "+Math.abs(days)+" calendar days "+(days>0?"later.":"earlier.");
+ if(result.ambiguous)note+=" Source time occurs twice during a clock change; using the first occurrence.";
+ $("resultNote").textContent=note;
+ lastCopy=$("resultTime").textContent+" · "+fullDate(result.date,to.tz)+" ("+to.name+", "+tzLabel(result.date,to.tz)+")";
+}
+function locRow(loc,selected) {
+ const button=document.createElement("button");button.type="button";button.className="location";
+ const symbol=document.createElement("span");symbol.className="flag";symbol.textContent=flag(loc.code);
+ const info=document.createElement("span");info.style.flex="1";
+ const name=document.createElement("span");name.className="location-title";name.textContent=loc.name;
+ const meta=document.createElement("span");meta.className="location-meta";meta.textContent=loc.sub;
+ info.append(name,meta);button.append(symbol,info);
+ if(selected?.id===loc.id){const check=document.createElement("span");check.className="location-selected";check.textContent="✓";button.append(check);}
+ button.addEventListener("click",()=>{ if(editing==="from")from=loc;else to=loc;save();refreshPicker();convert();closeModal();});
+ return button;
+}
+function updateList() {
+ const needle=$("searchInput").value.trim().toLowerCase();
+ const visible=locations.filter(l=>(l.name+" "+l.sub+" "+l.tz).toLowerCase().includes(needle));
+ const list=$("locationList");list.replaceChildren();
+ if(!visible.length){const empty=document.createElement("p");empty.className="no-results";empty.textContent="No matches. Try another country, city or state.";list.append(empty);return;}
+ const shown=needle?visible.slice(0,100):[
+  ...locations.filter(l=>["state:Georgia","country:BG","country:US","country:GB","city:London","city:Tokyo","city:Sydney"].includes(l.id)),
+  ...visible.filter(l=>!["state:Georgia","country:BG","country:US","country:GB","city:London","city:Tokyo","city:Sydney"].includes(l.id)).slice(0,150)
+ ];
+ let group="";
+ for(const loc of shown){
+  const grp=needle?loc.group:loc.group;
+  if(grp!==group){group=grp;const header=document.createElement("div");header.className="group-title";header.textContent=grp;list.append(header);}
+  list.append(locRow(loc,editing==="from"?from:to));
+ }
+ if(needle && visible.length>100){const more=document.createElement("p");more.className="no-results";more.textContent="Showing first 100 results. Keep typing to narrow your search.";list.append(more);}
+}
+function openModal(which) {
+ editing=which;lastModalFocus=document.activeElement;
+ $("modalTitle").textContent="Choose "+(which==="from"?"source":"destination");
+ $("searchInput").value="";
+ $("modal").classList.add("open");document.body.style.overflow="hidden";
+ updateList();$("locationList").scrollTop=0;
+ setTimeout(()=>$("searchInput").focus(),70);
+}
+function closeModal() {
+ $("modal").classList.remove("open");document.body.style.overflow="";
+ if(lastModalFocus && lastModalFocus.focus)lastModalFocus.focus();
+}
+$("fromBtn").addEventListener("click",()=>openModal("from"));
+$("toBtn").addEventListener("click",()=>openModal("to"));
+$("closeBtn").addEventListener("click",closeModal);
+$("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("modal").classList.contains("open"))closeModal();});
+$("searchInput").addEventListener("input",updateList);
+$("swapBtn").addEventListener("click",()=>{[from,to]=[to,from];save();refreshPicker();convert();});
+$("formatBtn").addEventListener("click",()=>{hours=hours==="12"?"24":"12";save();refreshPicker();convert();});
+$("dateInput").addEventListener("change",convert);
+$("timeInput").addEventListener("change",convert);
+$("nowBtn").addEventListener("click",setNow);
+$("copyBtn").addEventListener("click",async()=>{if(!lastCopy)return;try{await navigator.clipboard.writeText(lastCopy);$("copyBtn").textContent="Copied!";setTimeout(()=>$("copyBtn").textContent="Copy",1700);}catch(e){$("copyBtn").textContent="Select text to copy";setTimeout(()=>$("copyBtn").textContent="Copy",2200);}});
+refreshPicker();setNow();
+setInterval(renderClocks,1000);
+})();
+</script>
+</body>
+</html>
