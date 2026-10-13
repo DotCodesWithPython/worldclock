@@ -4,11 +4,12 @@ package.name = worldclock
 package.domain = org.worldclock
 source.dir = .
 source.include_exts = py
+services = clock:service/clock.py:foreground:sticky:foregroundServiceType=specialUse
 version = 1.0
 requirements = python3,kivy,plyer,tzdata,pyjnius
 orientation = portrait
 fullscreen = 0
-android.permissions = POST_NOTIFICATIONS
+android.permissions = POST_NOTIFICATIONS,FOREGROUND_SERVICE,FOREGROUND_SERVICE_SPECIAL_USE
 android.api = 34
 android.minapi = 24
 android.archs = arm64-v8a, armeabi-v7a
