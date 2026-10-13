@@ -111,6 +111,7 @@ class WorldClock(App):
         self.clocks.append({"name": name, "tz": tz})
         self.save()
         self.rebuild()
+        self.sync_android_notification()
 
     def set_main(self, i):
         self.main = i
@@ -159,27 +160,30 @@ class WorldClock(App):
             t.text = n.strftime("%H:%M")
             d.text = n.strftime("%a %d %b")
 
-    # ---------- Android notification on exit ----------
+    # ---------- Persistent Android notification ----------
+    def sync_android_notification(self, *_):
+        if platform != "android":
+            return
+        try:
+            from jnius import autoclass
+            activity = autoclass("org.kivy.android.PythonActivity").mActivity
+            service = autoclass("org.worldclock.worldclock.ServiceClock")
+            argument = json.dumps({"clocks": self.clocks, "main": self.main})
+            service.start(activity, argument)
+        except Exception as exc:
+            print("World Clock notification service:", exc)
+
     def on_start(self):
-        if platform == "android":
-            try:
-                from android.permissions import request_permissions, Permission
-                request_permissions([Permission.POST_NOTIFICATIONS])
-            except Exception:
-                pass
+        if platform != "android":
+            return
+        try:
+            from android.permissions import request_permissions, Permission
+            request_permissions([Permission.POST_NOTIFICATIONS],
+                                lambda permissions, grants: Clock.schedule_once(self.sync_android_notification, 0))
+        except Exception:
+            self.sync_android_notification()
 
     def on_pause(self):
-        if platform == "android":
-            try:
-                from plyer import notification
-                m = self.clocks[self.main]
-                others = [c for c in self.clocks if c is not m][:2]
-                notification.notify(
-                    title=f"{m['name']}  {now(m['tz']).strftime('%H:%M')}",
-                    message="   |   ".join(f"{c['name']} {now(c['tz']).strftime('%H:%M')}" for c in others),
-                    app_name="World Clock", timeout=30)
-            except Exception:
-                pass
         return True
 
     # ---------- Windows start-with-PC ----------
