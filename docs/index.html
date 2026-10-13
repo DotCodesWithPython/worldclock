@@ -578,13 +578,11 @@ function locRow(loc,selected) {
 }
 function updateList() {
  const needle=$("searchInput").value.trim().toLowerCase();
- const visible=locations.filter(l=>(l.name+" "+l.sub+" "+l.tz).toLowerCase().includes(needle));
+ const groupOrder={"US states":0,"Countries":1,"Cities & regions":2};
+ const visible=locations.filter(l=>(l.name+" "+l.sub+" "+l.tz).toLowerCase().includes(needle)).sort((a,b)=>groupOrder[a.group]-groupOrder[b.group]||a.name.localeCompare(b.name));
  const list=$("locationList");list.replaceChildren();
  if(!visible.length){const empty=document.createElement("p");empty.className="no-results";empty.textContent="No matches. Try another country, city or state.";list.append(empty);return;}
- const shown=needle?visible.slice(0,100):[
-  ...locations.filter(l=>["state:Georgia","country:BG","country:US","country:GB","city:London","city:Tokyo","city:Sydney"].includes(l.id)),
-  ...visible.filter(l=>!["state:Georgia","country:BG","country:US","country:GB","city:London","city:Tokyo","city:Sydney"].includes(l.id)).slice(0,150)
- ];
+ const shown=needle?visible.slice(0,100):visible;
  let group="";
  for(const loc of shown){
   const grp=needle?loc.group:loc.group;
